@@ -9,3 +9,5 @@ Predict which customers are likely to churn within 30 days.
 - Python
 - Scikit-learn
 - XGBoost
+- fastapi
+- uvicorn
