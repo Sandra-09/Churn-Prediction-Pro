@@ -1,0 +1,23 @@
+artifact_path: file:C:/Users/BLESSEL/Desktop/churn-prediction-engine/mlruns/1/models/m-c424e60605324667ac90a1968e1d4361/artifacts
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.pkl
+    predict_fn: predict
+    python_version: 3.13.12
+  sklearn:
+    code: null
+    pickled_model: model.pkl
+    serialization_format: cloudpickle
+    sklearn_version: 1.8.0
+    skops_trusted_types: null
+mlflow_version: 3.11.1
+model_id: m-c424e60605324667ac90a1968e1d4361
+model_size_bytes: 292902
+model_uuid: m-c424e60605324667ac90a1968e1d4361
+prompts: null
+run_id: 3ae6bfd84c2e40bd8066118c5e8a2ae2
+utc_time_created: '2026-04-08 22:20:15.618646'

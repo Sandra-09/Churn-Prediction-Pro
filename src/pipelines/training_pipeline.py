@@ -1,3 +1,6 @@
+import mlflow
+import mlflow.sklearn
+
 import pandas as pd
 import joblib
 
@@ -15,46 +18,53 @@ def run_training_pipeline():
 
     print("Training pipeline started...")
 
-    df = load_data("data/raw/telco_churn.csv")
+    mlflow.set_experiment("churn_prediction")
 
-    # Fix TotalCharges datatype
-    df["TotalCharges"] = pd.to_numeric(df["TotalCharges"], errors="coerce")
-    df = df.dropna()
+    with mlflow.start_run():
 
-    X = df.drop(columns=["customerID", "Churn"])
-    y = df["Churn"].map({"No": 0, "Yes": 1})
+        df = load_data("data/raw/telco_churn.csv")
 
-    categorical_features = X.select_dtypes(include=["object"]).columns
-    numeric_features = X.select_dtypes(exclude=["object"]).columns
+        df["TotalCharges"] = pd.to_numeric(df["TotalCharges"], errors="coerce")
+        df = df.dropna()
 
-    preprocessor = ColumnTransformer(
+        X = df.drop(columns=["customerID", "Churn"])
+        y = df["Churn"].map({"No": 0, "Yes": 1})
+        
+        categorical_features = X.select_dtypes(include=["object"]).columns
+        numeric_features = X.select_dtypes(exclude=["object"]).columns
+        
+        preprocessor = ColumnTransformer(
         transformers=[
             ("cat", OneHotEncoder(handle_unknown="ignore"), categorical_features),
-            ("num", "passthrough", numeric_features),
-        ]
-    )
+            ("num", "passthrough", numeric_features),])
+     
 
-    model = XGBClassifier()
+        model = XGBClassifier()
 
-    pipeline = Pipeline(
-        steps=[
+        pipeline = Pipeline(steps=[
             ("preprocessor", preprocessor),
             ("model", model)
-        ]
-    )
+        ])
+    
 
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=42
-    )
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y, test_size=0.2, random_state=42
+        )
 
-    pipeline.fit(X_train, y_train)
+        pipeline.fit(X_train, y_train)
 
-    preds = pipeline.predict(X_test)
+        preds = pipeline.predict(X_test)
 
-    acc = accuracy_score(y_test, preds)
+        acc = accuracy_score(y_test, preds)
 
-    print("Model Accuracy:", acc)
+        print("Model Accuracy:", acc)
 
-    joblib.dump(pipeline, "artifacts/model.pkl")
+        # log metric
+        mlflow.log_metric("accuracy", acc)
+
+        # log model
+        mlflow.sklearn.log_model(pipeline, "model")
+
+        joblib.dump(pipeline, "artifacts/model.pkl")
 
     print("Training pipeline completed.")
